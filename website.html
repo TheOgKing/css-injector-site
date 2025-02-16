@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate CSS Injector - Snippets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #1e1e2f;
+            color: white;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        input, textarea {
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            padding: 10px;
+            cursor: pointer;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        .snippet {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .snippet img {
+            width: 100%;
+            border-radius: 5px;
+        }
+        #search {
+            width: 80%;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Ultimate CSS Injector - Share Your Snippets</h2>
+    <input type="text" id="search" placeholder="Search website...">
+    
+    <div class="container">
+        <h3>Add a CSS Snippet</h3>
+        <input type="text" id="website" placeholder="Website Name">
+        <textarea id="cssCode" placeholder="Enter your CSS..."></textarea>
+        <input type="file" id="imageUpload" accept="image/*">
+        <button onclick="addSnippet()">Submit</button>
+    </div>
+    
+    <div id="snippets"></div>
+    
+    <script>
+        let snippets = JSON.parse(localStorage.getItem("cssSnippets")) || [];
+
+        function addSnippet() {
+            let website = document.getElementById("website").value.trim();
+            let cssCode = document.getElementById("cssCode").value.trim();
+            let imageUpload = document.getElementById("imageUpload").files[0];
+            
+            if (!website || !cssCode) {
+                alert("Please enter a website and CSS code.");
+                return;
+            }
+            
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                let newSnippet = { website, cssCode, image: e.target.result };
+                snippets.push(newSnippet);
+                localStorage.setItem("cssSnippets", JSON.stringify(snippets));
+                displaySnippets();
+            };
+            
+            if (imageUpload) {
+                reader.readAsDataURL(imageUpload);
+            } else {
+                let newSnippet = { website, cssCode, image: "" };
+                snippets.push(newSnippet);
+                localStorage.setItem("cssSnippets", JSON.stringify(snippets));
+                displaySnippets();
+            }
+        }
+
+        function displaySnippets() {
+            let container = document.getElementById("snippets");
+            container.innerHTML = "";
+            snippets.forEach((s, index) => {
+                let div = document.createElement("div");
+                div.className = "snippet";
+                div.innerHTML = `<h4>${s.website}</h4>
+                                ${s.image ? `<img src="${s.image}" alt="Preview">` : ""}
+                                <pre>${s.cssCode}</pre>
+                                <button onclick="deleteSnippet(${index})">Delete</button>`;
+                container.appendChild(div);
+            });
+        }
+        
+        function deleteSnippet(index) {
+            snippets.splice(index, 1);
+            localStorage.setItem("cssSnippets", JSON.stringify(snippets));
+            displaySnippets();
+        }
+
+        document.getElementById("search").addEventListener("input", function () {
+            let searchTerm = this.value.toLowerCase();
+            document.querySelectorAll(".snippet").forEach(snippet => {
+                snippet.style.display = snippet.innerHTML.toLowerCase().includes(searchTerm) ? "block" : "none";
+            });
+        });
+
+        displaySnippets();
+    </script>
+</body>
+</html>
